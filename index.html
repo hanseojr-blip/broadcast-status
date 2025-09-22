@@ -494,38 +494,64 @@
                 { id: '3층_1~4', name: '🟨 3층 시설 (2학년 1~4반)', facilities: ['2학년 1반', '2학년 2반', '2학년 3반', '2학년 4반'] },
                 { id: '3층_5~8', name: '🟪 3층 시설 (2학년 5~8반)', facilities: ['2학년 5반', '2학년 6반', '2학년 7반', '2학년 8반'] },
                 { id: '4층', name: '🔴 4층 시설', facilities: ['강당', '편집실', '과학실1'] },
-                { id: '신관_3층', name: '🟠 신관 3층 시설 (3학년 1~3반)', facilities: ['3학년 1반', '3학년 2반', '3학년 3반'] }
+                { id: '신관_3층', name: '🟠 신관 3층 시설 (3학년 1~3반)', facilities: ['3학년 1반', '3학년 2반', '3학년 3반'] },
+                { id: '방송실', name: '🟣 방송실', facilities: ['방송실'] }
             ];
             
             offlineGroups.forEach(group => {
                 const groupCard = document.createElement('div');
                 groupCard.className = 'group-card group-available';
                 
-                const facilitiesHTML = group.facilities.map(facility => `
-                    <div class="facility-item facility-available">
-                        <span class="facility-name">${facility}</span>
-                        <div class="facility-status">
-                            <span class="status-badge badge-pending">사용 가능</span>
+                // 방송실은 단순한 신청만 가능한 형태로 표시
+                if (group.id === '방송실') {
+                    groupCard.innerHTML = `
+                        <div class="group-header">
+                            <div class="group-name">${group.name}</div>
+                            <div class="group-status status-available">신청 가능</div>
                         </div>
-                    </div>
-                `).join('');
-                
-                groupCard.innerHTML = `
-                    <div class="group-header">
-                        <div class="group-name">${group.name}</div>
-                        <div class="group-status status-available">신청 가능</div>
-                    </div>
-                    <div class="facilities-list">
-                        <strong>세부 시설 현황:</strong>
-                        ${facilitiesHTML}
-                    </div>
-                    <div class="action-buttons">
-                        <button onclick="window.open('https://forms.gle/YdxPsbDNCwyi1GNC9', '_blank')" 
-                                class="btn btn-success">
-                            📝 신청하기
-                        </button>
-                    </div>
-                `;
+                        <div class="facilities-list">
+                            <strong>방송실 현황:</strong>
+                            <div class="facility-item facility-available">
+                                <span class="facility-name">방송실 전체</span>
+                                <div class="facility-status">
+                                    <span class="status-badge badge-pending">사용 가능</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button onclick="window.open('https://forms.gle/YdxPsbDNCwyi1GNC9', '_blank')" 
+                                    class="btn btn-success">
+                                📝 신청하기
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    const facilitiesHTML = group.facilities.map(facility => `
+                        <div class="facility-item facility-available">
+                            <span class="facility-name">${facility}</span>
+                            <div class="facility-status">
+                                <span class="status-badge badge-pending">사용 가능</span>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    groupCard.innerHTML = `
+                        <div class="group-header">
+                            <div class="group-name">${group.name}</div>
+                            <div class="group-status status-available">신청 가능</div>
+                        </div>
+                        <div class="facilities-list">
+                            <strong>세부 시설 현황:</strong>
+                            ${facilitiesHTML}
+                        </div>
+                        <div class="action-buttons">
+                            <button onclick="window.open('https://forms.gle/YdxPsbDNCwyi1GNC9', '_blank')" 
+                                    class="btn btn-success">
+                                📝 신청하기
+                            </button>
+                        </div>
+                    `;
+                }
                 
                 container.appendChild(groupCard);
             });
