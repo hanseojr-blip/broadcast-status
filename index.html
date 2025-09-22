@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📻 방송부 실시간 현황 - 세부 시설별</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .status-connected {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .date-input {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .group-available {
+            border-left-color: #95a5a6;
+        }
+
+        .group-applied {
+            border-left-color: #f39c12;
+            background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+        }
+
+        .group-completed {
+            border-left-color: #27ae60;
+            background: linear-gradient(135deg, #e8f8f5 0%, #ffffff 100%);
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .group-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .group-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status-available {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .status-applied {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-completed {
+            background: #27ae60;
+            color: white;
+        }
+
+        .applicant {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .facilities-list {
+            margin-top: 15px;
+        }
+
+        .facility-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 3px solid #ddd;
+        }
+
+        .facility-available {
+            border-left-color: #95a5a6;
+        }
+
+        .facility-applied {
+            border-left-color: #f39c12;
+            background: #fff9e6;
+        }
+
+        .facility-completed {
+            border-left-color: #27ae60;
+            background: #e8f8f5;
+        }
+
+        .facility-name {
+            font-weight: 500;
+        }
+
+        .facility-status {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge-good {
+            background: #27ae60;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .badge-error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .badge-pending {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .groups-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📻 방송부 실시간 현황</h1>
+            <p>세부 시설별 점검 현황을 실시간으로 확인하세요</p>
+            <div id="connectionStatus" class="status-indicator status-error">
+                🔄 연결 확인 중...
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="date" id="dateInput" class="date-input">
+            <button onclick="loadStatus()" class="btn btn-primary">현황 조회</button>
+            <button onclick="window.open('https://forms.gle/YdxPsbDNCwyi1GNC9', '_blank')" class="btn btn-success">
+                📝 신청하기
+            </button>
+            <button onclick="window.open('https://forms.gle/CV9uATrMgQ6sbWSu9', '_blank')" class="btn btn-success">
+                ✅ 점검 완료 보고
+            </button>
+        </div>
+
+        <div id="loadingDiv" class="loading" style="display: none;">
+            현황을 불러오는 중입니다...
+        </div>
+
+        <div id="groupsContainer" class="groups-grid"></div>
+
+        <div class="footer">
+            <p>마지막 업데이트: <span id="lastUpdate">-</span></p>
+            <p>🔄 15초마다 자동 새로고침</p>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwmaWOiejYj-g0urKhvQc3ODG_P7bg2iWT8U7NgoJTKk2TPWrPPgu5-QS8fgGztYU9M/exec';
+        
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+            loadStatus();
+            
+            // 15초마다 자동 새로고침
+            setInterval(loadStatus, 15000);
+        });
+
+        async function loadStatus() {
+            const dateInput = document.getElementById('dateInput');
+            const loadingDiv = document.getElementById('loadingDiv');
+            const groupsContainer = document.getElementById('groupsContainer');
+            const connectionStatus = document.getElementById('connectionStatus');
+            
+            loadingDiv.style.display = 'block';
+            groupsContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${WEB_APP_URL}?date=${dateInput.value}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    connectionStatus.className = 'status-indicator status-connected';
+                    connectionStatus.innerHTML = '🟢 실시간 데이터 연결됨';
+                    displayGroups(data.groups);
+                    document.getElementById('lastUpdate').textContent = 
+                        new Date(data.lastUpdate).toLocaleString('ko-KR');
+                } else {
+                    throw new Error(data.error || '데이터 로드 실패');
+                }
+                
+            } catch (error) {
+                console.error('데이터 로드 오류:', error);
+                connectionStatus.className = 'status-indicator status-error';
+                connectionStatus.innerHTML = '🔴 연결 실패 - 오프라인 모드';
+                displayOfflineGroups();
+            }
+            
+            loadingDiv.style.display = 'none';
+        }
+
+        function displayGroups(groups) {
+            const container = document.getElementById('groupsContainer');
+            
+            groups.forEach(group => {
+                const groupCard = document.createElement('div');
+                groupCard.className = `group-card group-${group.status}`;
+                
+                const facilitiesHTML = group.facilities.map(facility => {
+                    let statusBadges = '';
+                    
+                    if (facility.checkResult) {
+                        const volumeClass = getStatusClass(facility.checkResult.volume);
+                        const qualityClass = getStatusClass(facility.checkResult.quality);
+                        
+                        statusBadges = `
+                            <div class="facility-status">
+                                <span class="status-badge badge-${volumeClass}">
+                                    ${getVolumeIcon(facility.checkResult.volume)}
+                                </span>
+                                <span class="status-badge badge-${qualityClass}">
+                                    ${getQualityIcon(facility.checkResult.quality)}
+                                </span>
+                            </div>
+                        `;
+                    } else {
+                        statusBadges = `
+                            <div class="facility-status">
+                                <span class="status-badge badge-pending">
+                                    ${facility.status === 'applied' ? '대기중' : '미신청'}
+                                </span>
+                            </div>
+                        `;
+                    }
+                    
+                    return `
+                        <div class="facility-item facility-${facility.status}">
+                            <span class="facility-name">${facility.name}</span>
+                            ${statusBadges}
+                        </div>
+                    `;
+                }).join('');
+                
+                const statusText = {
+                    'available': '신청 가능',
+                    'applied': '점검 대기중',
+                    'completed': '점검 완료'
+                };
+                
+                const applicantInfo = group.applicant ? 
+                    `<div class="applicant">담당: ${group.applicant}</div>` : '';
+                
+                groupCard.innerHTML = `
+                    <div class="group-header">
+                        <div class="group-name">${group.name}</div>
+                        <div class="group-status status-${group.status}">
+                            ${statusText[group.status]}
+                        </div>
+                    </div>
+                    ${applicantInfo}
+                    <div class="facilities-list">
+                        <strong>세부 시설 현황:</strong>
+                        ${facilitiesHTML}
+                    </div>
+                    ${group.status === 'available' ? `
+                        <div class="action-buttons">
+                            <button onclick="window.open('https://forms.gle/YdxPsbDNCwyi1GNC9', '_blank')" 
+                                    class="btn btn-success">
+                                📝 신청하기
+                            </button>
+                        </div>
+                    ` : ''}
+                    ${group.status === 'applied' ? `
+                        <div class="action-buttons">
+                            <button onclick="window.open('https://forms.gle/CV9uATrMgQ6sbWSu9', '_blank')" 
+                                    class="btn btn-success">
+                                ✅ 점검 완료 보고
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                
+                container.appendChild(groupCard);
+            });
+        }
+
+        function getStatusClass(status) {
+            if (status.includes('적정') || status.includes('양호')) return 'good';
+            if (status.includes('심각한 문제') || status.includes('조절 불가')) return 'error';
+            return 'warning';
+        }
+
+        function getVolumeIcon(volume) {
+            if (volume.includes('적정')) return '🔊';
+            if (volume.includes('너무 큼')) return '📢';
+            if (volume.includes('너무 작음')) return '🔉';
+            if (volume.includes('조절 불가')) return '⚠️';
+            return '❓';
+        }
+
+        function getQualityIcon(quality) {
+            if (quality.includes('양호')) return '✅';
+            if (quality.includes('약간 문제')) return '⚠️';
+            if (quality.includes('심각한 문제')) return '❌';
+            return '❓';
+        }
+
+        function displayOfflineGroups() {
+            const container = document.getElementById('groupsContainer');
+            
+            const offlineGroups = [
+                { id: '1층', name: '🟤 1층 시설', facilities: ['수업나눔카페', '보건실', '라온반'] },
+                { id: '2층_1~4', name: '🟦 2층 시설 (1학년 1~4반)', facilities: ['1학년 1반', '1학년 2반', '1학년 3반', '1학년 4반'] },
+                { id: '2층_5~8', name: '🟢 2층 시설 (1학년 5~8반)', facilities: ['1학년 5반', '1학년 6반', '1학년 7반', '1학년 8반'] },
+                { id: '3층_1~4', name: '🟨 3층 시설 (2학년 1~4반)', facilities: ['2학년 1반', '2학년 2반', '2학년 3반', '2학년 4반'] },
+                { id: '3층_5~8', name: '🟪 3층 시설 (2학년 5~8반)', facilities: ['2학년 5반', '2학년 6반', '2학년 7반', '2학년 8반'] },
+                { id: '4층', name: '🔴 4층 시설', facilities: ['강당', '편집실', '과학실1'] },
+                { id: '신관_3층', name: '🟠 신관 3층 시설 (3학년 1~3반)', facilities: ['3학년 1반', '3학년 2반', '3학년 3반'] }
+            ];
+            
+            offlineGroups.forEach(group => {
+                const groupCard = document.createElement('div');
+                groupCard.className = 'group-card group-available';
+                
+                const facilitiesHTML = group.facilities.map(facility => `
+                    <div class="facility-item facility-available">
+                        <span class="facility-name">${facility}</span>
+                        <div class="facility-status">
+                            <span class="status-badge badge-pending">사용 가능</span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                groupCard.innerHTML = `
+                    <div class="group-header">
+                        <div class="group-name">${group.name}</div>
+                        <div class="group-status status-available">신청 가능</div>
+                    </div>
+                    <div class="facilities-list">
+                        <strong>세부 시설 현황:</strong>
+                        ${facilitiesHTML}
+                    </div>
+                    <div class="action-buttons">
+                        <button onclick="window.open('https://forms.gle/YdxPsbDNCwyi1GNC9', '_blank')" 
+                                class="btn btn-success">
+                            📝 신청하기
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(groupCard);
+            });
+            
+            document.getElementById('lastUpdate').textContent = '오프라인 모드';
+        }
+    </script>
+</body>
+</html>
