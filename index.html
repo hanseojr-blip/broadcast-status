@@ -328,7 +328,7 @@
 
         <div class="footer">
             <p>마지막 업데이트: <span id="lastUpdate">-</span></p>
-            <p>🔄 15초마다 자동 새로고침</p>
+            <p>🔄 30초마다 자동 새로고침</p>
         </div>
     </div>
 
@@ -341,8 +341,8 @@
             document.getElementById('dateInput').value = today;
             loadStatus();
             
-            // 15초마다 자동 새로고침
-            setInterval(loadStatus, 15000);
+            // 30초마다 자동 새로고침
+            setInterval(loadStatus, 30000);
         });
 
         async function loadStatus() {
